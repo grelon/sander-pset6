@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "80811184696",
+    "firebase_url": "https://sander-pset6.firebaseio.com",
+    "project_id": "sander-pset6",
+    "storage_bucket": "sander-pset6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:80811184696:android:f977fcec97f38842",
+        "android_client_info": {
+          "package_name": "com.example.sander.sander_pset6"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "80811184696-q2dkrhbcj92omgkmob8jgra8ss1lvfjp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sander.sander_pset6",
+            "certificate_hash": "ccd4cc81a1f20f54a621b889bb88d8584c2802d2"
+          }
+        },
+        {
+          "client_id": "80811184696-qhh56475vj8qofcb4masj2r4v7ubsuae.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxtyAFIX8ayyzKNDQsNH3tGIpG0acJpi0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "80811184696-qhh56475vj8qofcb4masj2r4v7ubsuae.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
