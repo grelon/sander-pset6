@@ -10,7 +10,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -58,9 +57,9 @@ public class Login extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
                     }
                     else {
+                        Log.d("log", "createUserWithEmail:onComplete: Succesful");
                         // set username
                         setUsername();
-                        sendToChat();
                     }
                     // send user to chat actvitiy
                 }
@@ -68,13 +67,26 @@ public class Login extends AppCompatActivity {
     }
 
     private void setUsername() {
-        // get uid and username
-        String uid = auth.getCurrentUser().getUid();
-        String username = etUsername.getText().toString();
+        Log.d("log", "Login.setUsername: start");
 
-        // update username
-        ref = FirebaseDatabase.getInstance().getReference();
-        ref.child("users").child(uid).child("username").setValue(username);
+        // get username from view
+        String username = etUsername.getText().toString();
+        // get userid from FB Auth
+        String uid = auth.getCurrentUser().getUid();
+
+        // write username to FB
+        DatabaseReference dbref = FirebaseDatabase.getInstance().getReference();
+        dbref.child("users").child(uid).child("username")
+                .setValue(username)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d("log", "Login.setUsername: completed");
+                        }
+                    }
+                });
+        sendToChat();
     }
 
     private void sendToChat() {
@@ -100,7 +112,6 @@ public class Login extends AppCompatActivity {
                         if (!task.isSuccessful()) {
                             Log.w("log", "User doesn't exist: create user", task.getException());
                             createUser();
-                            setUsername();
                         }
                     }
                 });
