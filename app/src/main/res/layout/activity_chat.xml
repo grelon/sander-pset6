@@ -5,17 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.sander.sander_pset6.Chat">
-
-    <TextView
-        android:id="@+id/chatTvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"/>
+    tools:context="com.example.sander.sander_pset6.ChatActivity">
 
     <ListView
         android:id="@+id/chatLvMessages"
-        android:layout_width="368dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:layout_editor_absoluteY="0dp"
         tools:layout_editor_absoluteX="8dp"></ListView>

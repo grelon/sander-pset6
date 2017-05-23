@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * Created by sander on 18-5-17.
  *
- * Message object
+ * Defines the Message class
  */
 
 public class Message {

@@ -1,9 +1,14 @@
+/**
+ * Created by sander on 22-5-17.
+ *
+ *
+ */
+
 package com.example.sander.sander_pset6;
 
 /**
- * Created by sander on 22-5-17.
+ * Defines the User class
  */
-
 public class User {
     private String username;
     private String uid;
@@ -11,13 +16,8 @@ public class User {
     // email is needed to comply with Maxim's standards
     private String email;
 
+    /* Default constructor used by FireBase */
     public User() {
-        // default constructor for FB
-    }
-
-    public User(String username, String email) {
-        this.username = username;
-        this.email = email;
     }
 
     public User(String username, String email, String uid) {
@@ -25,6 +25,9 @@ public class User {
         this.email = email;
         this.uid = uid;
     }
+
+
+    /* Getters and setters */
 
     public String getUid() {
         return uid;
