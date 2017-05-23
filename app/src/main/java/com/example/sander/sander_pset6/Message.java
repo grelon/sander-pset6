@@ -11,6 +11,7 @@ import java.util.Objects;
  */
 
 public class Message {
+    private String senderId;
     private String username;
     private String text;
 
@@ -20,13 +21,22 @@ public class Message {
         // Default constructor for FB to use
     }
 
-    public Message(String username, String text) {
+    public Message(String username, String text, String senderId) {
         this.username = username;
         this.text = text;
-
+        this.senderId = senderId;
     }
 
+
     /* getters and setters */
+
+    public String getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
+    }
 
     public String getUsername() {
         return username;

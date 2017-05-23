@@ -9,10 +9,11 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -21,12 +22,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Chat extends AppCompatActivity {
 
@@ -34,18 +32,14 @@ public class Chat extends AppCompatActivity {
 
     ListView lvMessages;
     EditText etChatMessage;
-    ArrayAdapter<String> arrayAdapter;
-    ArrayList<Message> arrayMessages;
-    ArrayList<String> stringArrayMessages;
-    String username;
+    User user;
 
     /* Firebase related stuff */
-    private DatabaseReference dbref;
     private DatabaseReference messagesRef;
     private DatabaseReference usersRef;
     private FirebaseAuth auth;
     private FirebaseAuth.AuthStateListener authStateListener;
-    private ChildEventListener messagesListener;
+    private FirebaseListAdapter messagesAdapter;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,7 +58,7 @@ public class Chat extends AppCompatActivity {
                 if (user != null) {
                     // User is signed in
                     Log.d("log", "onAuthStateChanged:signed_in:" + user.getUid());
-                    displayChat();
+                    displayChat(user);
 
                 } else {
                     // User is signed out
@@ -76,71 +70,36 @@ public class Chat extends AppCompatActivity {
 
     }
 
-    private void displayChat() {
-        dbref = FirebaseDatabase.getInstance().getReference();
+    private void displayChat(FirebaseUser userFB) {
+        // get references to database
+        DatabaseReference dbref = FirebaseDatabase.getInstance().getReference();
         messagesRef = dbref.child("messages");
         usersRef = dbref.child("users");
 
-        Log.d("log", "messagesRef: " + messagesRef.toString());
+        Log.d("log", "Chat.displayChat: populating user");
 
-        /* read messages from FB */
-        // set query for messages
-        // Query latestMessagesQuery = messagesRef.orderByKey().limitToLast(AMOUNT_OF_POSTS);
+        // populate user object
+        getUserInfo(userFB);
 
-        // define childeventlistener
-        messagesListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                
-            }
+        // read messges from DB
+        getMessages();
+    }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+    private void getUserInfo(FirebaseUser userFB) {
+        usersRef.child(userFB.getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        user = dataSnapshot.getValue(User.class);
+                        user.setUid(dataSnapshot.getKey());
+                        Log.d("log", "User: " + user.toString());
+                    }
 
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-
-        // add listener
-        // latestMessagesQuery.addChildEventListener()
-
-        // get messages from FB
-
-
-        // add value event listener to listen for new messages
-        ValueEventListener messageListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // get Message
-                Message message = dataSnapshot.getValue(Message.class);
-                stringArrayMessages.add(message.getText());
-                Log.d("log", "Chat.messageListenerload message success");
-                Toast.makeText(Chat.this, "message loaded",
-                        Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // get message failed, so log it
-                Log.d("log", "Chat.messageListenerload message failed");
-                Toast.makeText(Chat.this, "Failed to load message.",
-                        Toast.LENGTH_SHORT).show();
-            }
-        };
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d("log", "something went wrong: " + databaseError.toString());
+                    }
+                });
     }
 
     private void sendToLogin() {
@@ -156,66 +115,56 @@ public class Chat extends AppCompatActivity {
         auth.addAuthStateListener(authStateListener);
     }
 
-    private ArrayList<Message> getMessages() {
-        // init arraylist
-        ArrayList<Message> messages = new ArrayList<>();
-
-        // get uid
-        String uid = auth.getCurrentUser().getUid();
-        return messages;
+    private void getMessages() {
+        messagesAdapter = new FirebaseListAdapter<Message>(
+                this,
+                Message.class,
+                R.layout.list_messages_item,
+                messagesRef.limitToLast(AMOUNT_OF_POSTS)) {
+            @Override
+            protected void populateView(View view, Message message, int position) {
+                ((TextView) view.findViewById(R.id.text1)).setText(message.getUsername());
+                ((TextView) view.findViewById(R.id.text2)).setText(message.getText());
+            }
+        };
+        lvMessages.setAdapter(messagesAdapter);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        // stop all the listeners
         if (authStateListener != null) {
             auth.removeAuthStateListener(authStateListener);
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        // close databasehelper
-        super.onDestroy();
+        if (messagesAdapter != null) {
+            messagesAdapter.cleanup();
+        }
     }
 
     public void sendMessage(View view) {
         Log.d("log", "Chat.sendMessage(): start");
-        if (messagesRef != null) {
 
+        // if user exists, send the message
+        if (user != null) {
             // get text from view
             String text = etChatMessage.getText().toString();
 
-            // get user
-            FirebaseUser user = auth.getCurrentUser();
-            if (user != null) {
-                usersRef.child(user.getUid())
-                        .addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                // get username
-                                String username = dataSnapshot.getValue(String.class);
-                                Log.d("log", "username: ");
-                            }
+            // create new message object
+            Message message = new Message(user.getUsername(), text, user.getUid());
 
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                Log.d("log", databaseError.toString());
-                            }
-                        });
-//                // write a message to FB
-//                Map<String, Object> message = new HashMap<>();
-//                message.put("text", text);
-//                message.put("senderId", user.getUid());
-//                message.put("username", username;
-//                Task writingToFB = messagesRef.push().updateChildren(message);
-//                writingToFB.addOnCompleteListener(new OnCompleteListener() {
-//                    @Override
-//                    public void onComplete(@NonNull Task task) {
-//                        Log.d("log", "Chat.sendMessage: message sent");
-//                    }
-//                });
-            }
+            Log.d("log", "Chat.sendMessage(): sending message");
+            // write message to DB
+            messagesRef.push().setValue(message)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Log.d("log", "Chat.sendMessage(): message sent");
+                        }
+                    });
+
+            // clear etChatMessage
+            etChatMessage.getText().clear();
         }
     }
 }

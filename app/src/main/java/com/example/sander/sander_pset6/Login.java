@@ -22,12 +22,12 @@ public class Login extends AppCompatActivity {
     String password;
 
     EditText etEmail;
-    EditText etPass;
+    EditText etPassword;
     EditText etUsername;
 
     /* FB stuff */
     private FirebaseAuth auth;
-    private DatabaseReference ref;
+    private DatabaseReference dbref;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,14 +35,16 @@ public class Login extends AppCompatActivity {
 
         // get views
         etEmail = (EditText) findViewById(R.id.loginEmail);
-        etPass = (EditText) findViewById(R.id.loginPass);
+        etPassword = (EditText) findViewById(R.id.loginPass);
         etUsername = (EditText) findViewById(R.id.loginUsername);
 
         /* FB stuff */
         auth = FirebaseAuth.getInstance();
+        dbref = FirebaseDatabase.getInstance().getReference();
     }
 
     public void createUser() {
+        // create user in FB Auth
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
@@ -59,33 +61,35 @@ public class Login extends AppCompatActivity {
                     else {
                         Log.d("log", "createUserWithEmail:onComplete: Succesful");
                         // set username
-                        setUsername();
+                        putUserInDB(email);
                     }
-                    // send user to chat actvitiy
                 }
             });
     }
 
-    private void setUsername() {
-        Log.d("log", "Login.setUsername: start");
+    private void putUserInDB(String email) {
+        Log.d("log", "Login.putUserInDB: start");
 
-        // get username from view
+        // gather userinfo
         String username = etUsername.getText().toString();
-        // get userid from FB Auth
         String uid = auth.getCurrentUser().getUid();
 
+        // create User object
+        User user = new User(username, email);
+
         // write username to FB
-        DatabaseReference dbref = FirebaseDatabase.getInstance().getReference();
-        dbref.child("users").child(uid).child("username")
-                .setValue(username)
+        dbref.child("users").child(uid)
+                .setValue(user)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            Log.d("log", "Login.setUsername: completed");
+                            Log.d("log", "Login.putUserInDB: completed");
                         }
                     }
                 });
+
+        // send user to chat activity
         sendToChat();
     }
 
@@ -97,7 +101,7 @@ public class Login extends AppCompatActivity {
 
     public void createOrLogin(View view) {
         email = etEmail.getText().toString();
-        password = etPass.getText().toString();
+        password = etPassword.getText().toString();
 
         // try to login
         auth.signInWithEmailAndPassword(email, password)
@@ -105,7 +109,6 @@ public class Login extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d("log", "signInWithEmail:onComplete:" + task.isSuccessful());
-
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
@@ -113,7 +116,11 @@ public class Login extends AppCompatActivity {
                             Log.w("log", "User doesn't exist: create user", task.getException());
                             createUser();
                         }
+                        else {
+                            sendToChat();
+                        }
                     }
+
                 });
     }
 }
