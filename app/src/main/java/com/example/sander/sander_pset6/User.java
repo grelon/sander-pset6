@@ -1,58 +1,50 @@
-/**
+/*
  * Created by sander on 22-5-17.
- *
- *
  */
 
 package com.example.sander.sander_pset6;
 
 /**
- * Defines the User class
+ * Defines the User class. The email attribute is needed to comply with Maxime's standards
+ *
  */
-public class User {
+class User {
     private String username;
     private String uid;
-
-    // email is needed to comply with Maxim's standards
     private String email;
 
-    /* Default constructor used by FireBase */
-    public User() {
+    /* Constructor */
+    User() {
+        // default constructor for FB to use
     }
-
-    public User(String username, String email, String uid) {
-        this.username = username;
-        this.email = email;
-        this.uid = uid;
-    }
-
 
     /* Getters and setters */
 
-    public String getUid() {
+    String getUid() {
         return uid;
     }
 
-    public void setUid(String uid) {
+    void setUid(String uid) {
         this.uid = uid;
     }
 
-    public String getUsername() {
+    String getUsername() {
         return username;
     }
 
-    public void setUsername(String username) {
+    void setUsername(String username) {
         this.username = username;
     }
 
-    public String getEmail() {
+    String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
+    void setEmail(String email) {
         this.email = email;
     }
 
+    /* Other */
     @Override
     public String toString() {
         return "User{" +

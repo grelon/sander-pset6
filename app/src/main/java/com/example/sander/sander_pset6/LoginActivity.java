@@ -1,4 +1,4 @@
-/**
+/*
  * Created by sander on 18-5-17.
  */
 
@@ -201,14 +201,10 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * Validates email input.
      *
-     * Snippet found at: https://stackoverflow.com/a/15808057
+     * Snippet found at and edited from: https://stackoverflow.com/a/15808057
      * Many thanks to the poster.
      */
-    public final static boolean isValidEmail(CharSequence target) {
-        if (target == null) {
-            return false;
-        } else {
-            return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
-        }
+    public static boolean isValidEmail(CharSequence target) {
+        return target != null && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 }

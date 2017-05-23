@@ -7,4 +7,5 @@
     <string name="invalid_email">Email format needs to be: example@example.example</string>
     <string name="default_username">Anonymous</string>
     <string name="unknown_error">Unknown error. Be gentle with me, I\'m just over one week old and still pretty fragile.</string>
+    <string name="chat_hint">Say something</string>
 </resources>
