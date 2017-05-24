@@ -1,4 +1,4 @@
-## Sander-pset-4
+## Sander-pset-6
 
 [![BCH compliance](https://bettercodehub.com/edge/badge/grelon/sander-pset6?branch=master)](https://bettercodehub.com/)
 

@@ -160,7 +160,6 @@ public class LoginActivity extends AppCompatActivity {
 
         // try to login
         try {
-
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -176,14 +175,16 @@ public class LoginActivity extends AppCompatActivity {
             Log.w("log", "invalid input", e);
             invalidInput(email, password);
         }
-
     }
 
+    /**
+     * Informs user about what is wrong with their input
+     */
     private void invalidInput(String email, String password) {
         if (!isValidEmail(email)){
             Toast.makeText(getApplicationContext(), R.string.invalid_email, Toast.LENGTH_SHORT).show();
         }
-        else if (!isValidEmail(password)){
+        else if (!isValidPassword(password)){
             Toast.makeText(getApplicationContext(), R.string.invalid_password, Toast.LENGTH_SHORT).show();
         }
         else {
@@ -201,8 +202,7 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * Validates email input.
      *
-     * Snippet found at and edited from: https://stackoverflow.com/a/15808057
-     * Many thanks to the poster.
+     * Based on snippit found at: https://stackoverflow.com/a/15808057
      */
     public static boolean isValidEmail(CharSequence target) {
         return target != null && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
