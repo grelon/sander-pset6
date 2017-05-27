@@ -23,7 +23,6 @@ import com.google.firebase.database.FirebaseDatabase;
 
 /**
  * Defines the LoginActivity. This activity helps the user login or create an account.
- *
  * N.B.: DB is short for database.
  */
 public class LoginActivity extends AppCompatActivity {
@@ -79,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
                 // otherwise, set username in DB
                 else {
                     Log.d("log", "createUserWithEmail:onComplete: Succesful");
-                    putUserInDB(auth.getCurrentUser());
+                    putUserInDb(auth.getCurrentUser());
                 }
             }
         };
@@ -94,8 +93,8 @@ public class LoginActivity extends AppCompatActivity {
      * This circumvents bug with FirebaseUser.setDisplayname. It is also needed to comply with Maxim's
      * implementation standards
      */
-    private void putUserInDB(FirebaseUser FBuser) {
-        Log.d("log", "LoginActivity.putUserInDB: start");
+    private void putUserInDb(FirebaseUser FBuser) {
+        Log.d("log", "LoginActivity.putUserInDb: start");
 
         // collect username from view
         String username = etUsername.getText().toString();
@@ -126,7 +125,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 // send user to chat activity
                 else {
-                    Log.d("log", "LoginActivity.putUserInDB: completed");
+                    Log.d("log", "LoginActivity.putUserInDb: completed");
                     sendToChat();
                 }
             }
@@ -172,7 +171,6 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
         } catch (IllegalArgumentException e) {
-            Log.w("log", "invalid input", e);
             invalidInput(email, password);
         }
     }
@@ -201,8 +199,7 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Validates email input.
-     *
-     * Based on snippit found at: https://stackoverflow.com/a/15808057
+     * Based on snippet found at: https://stackoverflow.com/a/15808057
      */
     public static boolean isValidEmail(CharSequence target) {
         return target != null && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();

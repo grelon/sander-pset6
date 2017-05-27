@@ -113,7 +113,7 @@ public class ChatActivity extends AppCompatActivity {
 
         // actually add listener
         usersRef.child(userFB.getUid())
-                .addValueEventListener(listener);
+                .addListenerForSingleValueEvent(listener);
     }
 
     private void sendToLogin() {
