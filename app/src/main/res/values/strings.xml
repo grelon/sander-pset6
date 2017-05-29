@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">sander-pset6</string>
 
-    <string name="db_error">Couldn\'t write to Database. Not your fault! Sorry \'bout that.</string>
+    <string name="db_error">Couldn\'t read/write to Database. Not your fault! Sorry about that.</string>
     <string name="creation_failed">Account creation failed. Not your fault! Sorry \'bout that.</string>
     <string name="invalid_password">Password needs to be at least 6 characters.</string>
     <string name="invalid_email">Email format needs to be: example@example.example</string>

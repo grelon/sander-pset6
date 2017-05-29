@@ -27,19 +27,15 @@ import com.google.firebase.database.FirebaseDatabase;
  */
 public class LoginActivity extends AppCompatActivity {
 
-    // minimum password length
     private static final int MIN_PASS_LENGTH = 6;
 
-    // user strings
     private String email;
     private String password;
 
-    // views
     private EditText etEmail;
     private EditText etPassword;
     private EditText etUsername;
 
-    // FB related stuff
     private FirebaseAuth auth;
     private DatabaseReference dbref;
 
@@ -47,37 +43,56 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // get views
         etEmail = (EditText) findViewById(R.id.loginEmail);
         etPassword = (EditText) findViewById(R.id.loginPass);
         etUsername = (EditText) findViewById(R.id.loginUsername);
 
-        // get Firebase instances
         auth = FirebaseAuth.getInstance();
         dbref = FirebaseDatabase.getInstance().getReference();
     }
 
     /**
+     * Tries to login or create user when Create/Login button is clicked.
+     */
+    public void createOrLogin(View view) {
+        email = etEmail.getText().toString();
+        password = etPassword.getText().toString();
+
+        // try to login
+        try {
+            auth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (!task.isSuccessful()) {
+                                // user doesn't exist
+                                createUser();
+                            } else {
+                                // user exists
+                                sendToChat();
+                            }
+                        }
+                    });
+        } catch (IllegalArgumentException e) {
+            invalidInput(email, password);
+        }
+    }
+
+
+    /**
      * Creates the user when login credentials don't exist yet.
      */
     public void createUser() {
-        // define onCompleteListener listener
         OnCompleteListener listener = new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
-                Log.d("log", "createUserWithEmail:onComplete:");
-
                 // if account creation failed, inform user
                 if (!task.isSuccessful()) {
                     Toast.makeText(
                             getApplicationContext(),
                             R.string.creation_failed,
                             Toast.LENGTH_SHORT).show();
-                }
-
-                // otherwise, set username in DB
-                else {
-                    Log.d("log", "createUserWithEmail:onComplete: Succesful");
+                } else {
                     putUserInDb(auth.getCurrentUser());
                 }
             }
@@ -90,13 +105,10 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Puts user also in DB.
-     * This circumvents bug with FirebaseUser.setDisplayname. It is also needed to comply with Maxim's
-     * implementation standards
+     * This circumvents bug with FirebaseUser.setDisplayname which still seems to exist: https://github.com/firebase/FirebaseUI-Android/issues/409
+     * It is also needed to comply with Maxim's implementation standards.
      */
     private void putUserInDb(FirebaseUser FBuser) {
-        Log.d("log", "LoginActivity.putUserInDb: start");
-
-        // collect username from view
         String username = etUsername.getText().toString();
 
         // define default username
@@ -104,13 +116,11 @@ public class LoginActivity extends AppCompatActivity {
             username = getResources().getString(R.string.default_username);
         }
 
-        // create User object
         User user = new User();
         user.setUsername(username);
         user.setUid(FBuser.getUid());
         user.setEmail(FBuser.getEmail());
 
-        // define onCompleteListener listener
         OnCompleteListener listener = new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -121,22 +131,13 @@ public class LoginActivity extends AppCompatActivity {
                             R.string.db_error,
                             Toast.LENGTH_SHORT)
                             .show();
-                }
-
-                // send user to chat activity
-                else {
-                    Log.d("log", "LoginActivity.putUserInDb: completed");
-                    sendToChat();
-                }
+                } else { sendToChat(); }
             }
         };
 
         // write user to DB and add listener
         dbref.child("users").child(user.getUid())
-                // actually put user object in DB
                 .setValue(user)
-
-                // listen for completion of this task
                 .addOnCompleteListener(listener);
     }
 
@@ -149,31 +150,6 @@ public class LoginActivity extends AppCompatActivity {
         finish();
     }
 
-    /**
-     * Tries to login or create user when Create/Login button is clicked
-     */
-    public void createOrLogin(View view) {
-        // get text from view
-        email = etEmail.getText().toString();
-        password = etPassword.getText().toString();
-
-        // try to login
-        try {
-            auth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d("log", "signInWithEmail:onComplete:" + task.isSuccessful());
-                        if (!task.isSuccessful()) {
-                                Log.d("log", "User doesn't exist: create user");
-                                createUser();
-                        } else { sendToChat(); }
-                    }
-                });
-        } catch (IllegalArgumentException e) {
-            invalidInput(email, password);
-        }
-    }
 
     /**
      * Informs user about what is wrong with their input

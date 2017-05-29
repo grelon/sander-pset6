@@ -28,20 +28,18 @@ import com.google.firebase.database.ValueEventListener;
 
 /**
  * Defines the ChatActivity. This activity provides all of the chat action.
+ * Makes use of custom Message and User classes.
  *
  * N.B.: DB is short for database.
  */
 public class ChatActivity extends AppCompatActivity {
 
-    // maximum amount of post to read from DB
     private static final int AMOUNT_OF_POSTS = 100;
 
-    // views
     ListView lvMessages;
     EditText etChatMessage;
     User user;
 
-    // FB related stuff
     private DatabaseReference messagesRef;
     private DatabaseReference usersRef;
     private FirebaseAuth auth;
@@ -52,14 +50,18 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        // get views
         lvMessages = (ListView) findViewById(R.id.chatLvMessages);
         etChatMessage = (EditText) findViewById(R.id.chatEtMessage);
 
-        // init Firebase Authentication
         auth = FirebaseAuth.getInstance();
 
-        // listen if user is still logged in
+        startAuthStateListener();
+    }
+
+    /**
+     * Listens if user is still logged in.
+     */
+    private void startAuthStateListener() {
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -76,27 +78,24 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         };
-
     }
 
     /**
      * Displays the actual chat messages by eventually populating lvMessages.
      */
     private void displayChat(FirebaseUser userFB) {
-        // get references to database
         DatabaseReference dbref = FirebaseDatabase.getInstance().getReference();
         messagesRef = dbref.child("messages");
         usersRef = dbref.child("users");
 
-        // populate user object
         getUserInfo(userFB);
-
-        // read messges from DB
         getMessages();
     }
 
+    /**
+     * Gets user information for the given FirebaseUser and populates a User instance with it.
+     */
     private void getUserInfo(FirebaseUser userFB) {
-        // define listener
         ValueEventListener listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -111,16 +110,8 @@ public class ChatActivity extends AppCompatActivity {
             }
         };
 
-        // actually add listener
         usersRef.child(userFB.getUid())
                 .addListenerForSingleValueEvent(listener);
-    }
-
-    private void sendToLogin() {
-        // send user to login
-        Intent intentToLogin = new Intent(this, LoginActivity.class);
-        startActivity(intentToLogin);
-        finish();
     }
 
     @Override
@@ -130,10 +121,9 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     /**
-     * Gets messages from DB and populate lvMessages with them.
+     * Gets messages from DB and populates lvMessages with them.
      */
     private void getMessages() {
-        // initialize new FirebaseListAdapter
         messagesAdapter = new FirebaseListAdapter<Message>(
                 this,
                 Message.class,
@@ -150,6 +140,28 @@ public class ChatActivity extends AppCompatActivity {
         lvMessages.setAdapter(messagesAdapter);
     }
 
+    /**
+     * Sends user to LoginActivity.
+     */
+    private void sendToLogin() {
+        Intent intentToLogin = new Intent(this, LoginActivity.class);
+        startActivity(intentToLogin);
+        finish();
+    }
+
+    /**
+     * Sends a message to the database when send button is clicked.
+     */
+    public void sendMessage(View view) {
+        // if user exists, send the message
+        if (user != null) {
+            String text = etChatMessage.getText().toString();
+            Message message = new Message(user.getUsername(), text, user.getUid());
+            messagesRef.push().setValue(message);
+            etChatMessage.getText().clear();
+        }
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -159,35 +171,6 @@ public class ChatActivity extends AppCompatActivity {
         }
         if (messagesAdapter != null) {
             messagesAdapter.cleanup();
-        }
-    }
-
-    /**
-     * Sends a message to the database when send button is clicked.
-     */
-    public void sendMessage(View view) {
-        Log.d("log", "ChatActivity.sendMessage(): start");
-
-        // if user exists, send the message
-        if (user != null) {
-            // get text from view
-            String text = etChatMessage.getText().toString();
-
-            // create new message object
-            Message message = new Message(user.getUsername(), text, user.getUid());
-
-            Log.d("log", "ChatActivity.sendMessage(): sending message");
-            // write message to DB
-            messagesRef.push().setValue(message)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            Log.d("log", "ChatActivity.sendMessage(): message sent");
-                        }
-                    });
-
-            // clear etChatMessage
-            etChatMessage.getText().clear();
         }
     }
 }

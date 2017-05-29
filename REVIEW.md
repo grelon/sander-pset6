@@ -14,5 +14,5 @@ Aspect of code quality: description of example (reference). Solution.
 6. Headers: Class header doesn't note what custom classes are going to be used (ChatActivity:30). Note custom classes used as a heads up to reader.
 7. Decomposition: Authstate listener clutters onCreate method (ChatActivity:62). Give Auth listener it's own method.
 8. Headers: getUserInfo doesn't have a header (ChatActivity: 98). Give it a header.
-9. Comment: Unneccessary log.d (ChatActivity: 169). Leave it out.
+9. Comment: Unnecessary log.d (ChatActivity: 169). Leave it out.
 10. Formatting: Inconsistent use of linebreaks (Message: 33). Conform to rest of file.

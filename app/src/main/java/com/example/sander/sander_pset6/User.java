@@ -6,8 +6,7 @@ package com.example.sander.sander_pset6;
 
 /**
  * Defines the User class.
- * The email attribute is needed to comply with Maxime's standards. Unused getter and setter methods
- * are included for ease of possible future use.
+ * The email attribute is needed to comply with Maxime's standards.
  */
 class User {
     private String username;

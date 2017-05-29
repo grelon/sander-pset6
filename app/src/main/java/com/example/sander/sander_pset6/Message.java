@@ -6,8 +6,7 @@ package com.example.sander.sander_pset6;
 
 /**
  * Defines the Message class.
- * Value name 'senderId' was chosen to comply with Maxim's implementation. Unused getter and setter
- * methods are included for ease of possible future use.
+ * Value name 'senderId' was chosen to comply with Maxim's implementation.
  */
 class Message {
     private String senderId;
